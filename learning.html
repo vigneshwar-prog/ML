@@ -324,6 +324,53 @@
     }
     .search-bar:focus { border-color: var(--accent); }
 
+    /* ── CHECKLIST ── */
+    .checklist-summary {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+    }
+    .checklist-phase {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .checklist-phase h3 {
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+      color: var(--accent2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .checklist-items {
+      display: grid;
+      gap: 8px;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      color: var(--text);
+    }
+    .check-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent2);
+      cursor: pointer;
+    }
+    .check-item.done label {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       header { padding: 18px 16px; }
@@ -387,9 +434,16 @@
   <!-- TABS -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('log')">📋 Learning Log</button>
+    <button class="tab-btn" onclick="switchTab('checklist')">✅ Plan Checklist</button>
     <button class="tab-btn" onclick="switchTab('recall')">🃏 Recall Cards</button>
     <button class="tab-btn" onclick="switchTab('interview')">🎤 Interview Bank</button>
     <button class="tab-btn" onclick="switchTab('add')">➕ Add Entry</button>
+  </div>
+
+  <!-- CHECKLIST TAB -->
+  <div class="log-section" id="tab-checklist">
+    <div class="checklist-summary" id="checklistSummary"></div>
+    <div id="checklistContainer"></div>
   </div>
 
   <!-- LOG TAB -->
@@ -562,12 +616,83 @@
     'Phase 0 — Prerequisites': 4,
     'Phase 1 — Classical ML': 8,
     'Phase 2 — Evaluation & Tuning': 9,
-    'Phase 3 — Unsupervised Learning': 4,
+    'Phase 3 — Unsupervised Learning': 5,
     'Phase 4 — Deep Learning': 10,
     'Phase 5 — Advanced DL': 6,
     'Phase 6 — Specialization': 4,
     'Phase 7 — Interview Bootcamp': 4,
   };
+
+  const CHECKLIST_PLAN = {
+    'Phase 0 — Prerequisites': [
+      'Python (NumPy, Pandas, Matplotlib)',
+      'Linear Algebra (Vectors, Matrices, Dot Product)',
+      'Statistics (Distributions, Bias-Variance)',
+      'Calculus Basics (Derivatives, Gradients)',
+    ],
+    'Phase 1 — Classical ML': [
+      'Module 1.1 — Linear Regression',
+      'Module 1.2 — Logistic Regression',
+      'Module 1.3 — Decision Trees',
+      'Module 1.4 — Random Forest',
+      'Module 1.5 — Support Vector Machine (SVM)',
+      'Module 1.6 — K-Nearest Neighbors (KNN)',
+      'Module 1.7 — Naive Bayes',
+      'Module 1.8 — Gradient Boosting (XGBoost, LightGBM)',
+    ],
+    'Phase 2 — Evaluation & Tuning': [
+      'Train/Val/Test Split',
+      'Cross Validation (K-Fold)',
+      'Confusion Matrix',
+      'Precision, Recall, F1-Score',
+      'ROC-AUC Curve',
+      'Overfitting & Underfitting',
+      'Regularization (L1, L2, ElasticNet)',
+      'Hyperparameter Tuning',
+      'Feature Engineering & Scaling',
+    ],
+    'Phase 3 — Unsupervised Learning': [
+      'K-Means Clustering',
+      'DBSCAN',
+      'PCA (Principal Component Analysis)',
+      't-SNE',
+      'Autoencoders (intro)',
+    ],
+    'Phase 4 — Deep Learning': [
+      'Artificial Neural Networks (ANN)',
+      'Activation Functions',
+      'Loss Functions',
+      'Optimizers (SGD, Adam, RMSProp)',
+      'Backpropagation',
+      'Batch Normalization',
+      'Dropout & Regularization',
+      'CNN (Convolutional Neural Networks)',
+      'RNN & LSTM',
+      'Transformers & Attention Mechanism',
+    ],
+    'Phase 5 — Advanced DL': [
+      'Transfer Learning',
+      'GANs (Generative Adversarial Networks)',
+      'Object Detection (YOLO, Faster R-CNN)',
+      'Word Embeddings (Word2Vec, GloVe)',
+      'BERT & Fine-tuning',
+      'Reinforcement Learning Basics',
+    ],
+    'Phase 6 — Specialization': [
+      'Computer Vision Track (OpenCV, YOLO, Diffusion Models)',
+      'NLP / LLMs Track (HuggingFace, LangChain, Fine-tuning)',
+      'Time Series Track (ARIMA, Prophet, Temporal Fusion)',
+      'Reinforcement Learning Track (OpenAI Gym, PPO, DQN)',
+    ],
+    'Phase 7 — Interview Bootcamp': [
+      'Classical ML Mock Interviews (50 Qs)',
+      'Deep Learning Mock Interviews (50 Qs)',
+      'Scenario & Case-Based Questions (30 Qs)',
+      'Full Mock Interview Simulation',
+    ],
+  };
+
+  let checklistState = JSON.parse(localStorage.getItem('mlChecklistState') || '{}');
 
   const DEFAULT_ENTRIES = [
     {
@@ -621,22 +746,41 @@
   function renderAll() {
     renderStats();
     renderPhases();
+    renderChecklist();
     renderHeatmap();
     renderLog();
     renderRecall();
     renderInterview();
   }
 
+  function getChecklistStats() {
+    let done = 0;
+    let total = 0;
+    PHASES.forEach(ph => {
+      const items = CHECKLIST_PLAN[ph] || [];
+      total += items.length;
+      items.forEach(item => {
+        if (checklistState[`${ph}||${item}`]) done += 1;
+      });
+    });
+    return { done, total };
+  }
+
+  function getPhaseCompletedCount(phase) {
+    const items = CHECKLIST_PLAN[phase] || [];
+    return items.filter(item => checklistState[`${phase}||${item}`]).length;
+  }
+
   // ── STATS ──
   function renderStats() {
-    const total = entries.length;
+    const checklist = getChecklistStats();
+    const total = checklist.done;
     const days = new Set(entries.map(e => e.date)).size;
     const qs = entries.reduce((s, e) => s + (parseInt(e.qs) || 0), 0);
     const confs = entries.map(e => e.stars).filter(Boolean);
     const avgConf = confs.length ? (confs.reduce((a,b)=>a+b,0)/confs.length).toFixed(1) : '—';
     const revision = entries.filter(e => e.revision === 'Yes').length;
-    const totalModules = Object.values(PHASE_TOTALS).reduce((a,b)=>a+b,0);
-    const overall = Math.round((total / totalModules) * 100);
+    const overall = checklist.total ? Math.round((checklist.done / checklist.total) * 100) : 0;
 
     document.getElementById('statModules').textContent = total;
     document.getElementById('statDays').textContent = days;
@@ -651,7 +795,7 @@
     const grid = document.getElementById('phaseGrid');
     grid.innerHTML = '';
     PHASES.forEach(ph => {
-      const done = entries.filter(e => e.phase === ph).length;
+      const done = getPhaseCompletedCount(ph);
       const total = PHASE_TOTALS[ph] || 1;
       const pct = Math.min(Math.round((done / total) * 100), 100);
       grid.innerHTML += `
@@ -665,6 +809,55 @@
           </div>
         </div>`;
     });
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklistContainer');
+    const summary = document.getElementById('checklistSummary');
+    if (!container || !summary) return;
+
+    const stats = getChecklistStats();
+    const pct = stats.total ? Math.round((stats.done / stats.total) * 100) : 0;
+    summary.innerHTML = `
+      <strong>Plan Completion:</strong> ${stats.done}/${stats.total} modules complete (${pct}%)
+    `;
+
+    container.innerHTML = PHASES.map(ph => {
+      const items = CHECKLIST_PLAN[ph] || [];
+      const done = getPhaseCompletedCount(ph);
+      const phasePct = items.length ? Math.round((done / items.length) * 100) : 0;
+      const list = items.map((item, idx) => {
+        const key = `${ph}||${item}`;
+        const checked = !!checklistState[key];
+        return `
+          <div class="check-item ${checked ? 'done' : ''}">
+            <input type="checkbox" id="chk-${ph.replace(/[^a-zA-Z0-9]/g,'')}-${idx}" ${checked ? 'checked' : ''} onchange="toggleChecklistItem('${encodeURIComponent(ph)}','${encodeURIComponent(item)}', this.checked)">
+            <label for="chk-${ph.replace(/[^a-zA-Z0-9]/g,'')}-${idx}">${item}</label>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="checklist-phase">
+          <h3>
+            <span>${ph}</span>
+            <span>${done}/${items.length} · ${phasePct}%</span>
+          </h3>
+          <div class="checklist-items">${list}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleChecklistItem(phaseEnc, itemEnc, checked) {
+    const phase = decodeURIComponent(phaseEnc);
+    const item = decodeURIComponent(itemEnc);
+    const key = `${phase}||${item}`;
+    checklistState[key] = checked;
+    localStorage.setItem('mlChecklistState', JSON.stringify(checklistState));
+    renderStats();
+    renderPhases();
+    renderChecklist();
   }
 
   // ── HEATMAP ──
