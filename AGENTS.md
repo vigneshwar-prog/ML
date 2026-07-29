@@ -65,6 +65,15 @@ Current packages (see [requirements.txt](requirements.txt)):
 - Phase 0–1: `numpy`, `pandas`, `matplotlib`, `scikit-learn`
 - Phase 4+ (add when needed): `torch`, `tensorflow`, `keras`
 
+## Git Publishing Workflow
+- Remote repo: [https://github.com/vigneshwar-prog/ML](https://github.com/vigneshwar-prog/ML)
+- After meaningful changes, commit and push to `main`.
+- Suggested sequence:
+  1. `git add -A`
+  2. `git commit -m "<clear message>"`
+  3. `git push origin main`
+- Keep commits focused (one learning task or module per commit).
+
 ## Code File Convention
 Every topic gets its own file inside a named subfolder under `code/`:
 
