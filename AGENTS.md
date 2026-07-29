@@ -75,41 +75,41 @@ Current packages (see [requirements.txt](requirements.txt)):
 - Keep commits focused (one learning task or module per commit).
 
 ## Code File Convention
-Every topic gets its own file inside a named subfolder under `code/`:
+Every topic gets its own notebook inside a named subfolder under `code/`:
 
 ```
 code/
   phase0/
     python_for_ml/
-      numpy_basics.py
-      pandas_basics.py
-      matplotlib_basics.py
+      numpy_basics.ipynb
+      pandas_basics.ipynb
+      matplotlib_basics.ipynb
     linear_algebra/
-      vectors_matrices.py
-      dot_product.py
+      vectors_matrices.ipynb
+      dot_product.ipynb
     statistics/
-      distributions.py
-      bias_variance.py
+      distributions.ipynb
+      bias_variance.ipynb
     calculus/
-      derivatives_gradients.py
+      derivatives_gradients.ipynb
   phase1/
     linear_regression/
-      theory_and_code.py
+      theory_and_code.ipynb
     logistic_regression/
-      theory_and_code.py
+      theory_and_code.ipynb
   ...
 ```
 
 Naming rules:
 - Subfolder = topic name (e.g., `python_for_ml`, `linear_regression`)
-- File = concept name, lowercase with underscores (e.g., `numpy_basics.py`)
-- Include section headers (`SECTION 1`, `SECTION 2`, …) inside each file
-- End each section with a `# ── PRACTICE: …` comment prompt
-- Save plots with `plt.savefig()` alongside the script, not just `plt.show()`
-- One concept per file — never combine unrelated topics
+- File = concept name, lowercase with underscores (e.g., `numpy_basics.ipynb`)
+- Use one concept per notebook and split into section-wise cells
+- Add a practice cell after each section for hands-on edits
+- Save key plots with `plt.savefig()` when output files are needed
+- Prefer notebook generation over `.py` for learning content
 
 ## Do NOT
 - Skip theory and jump straight to code
 - Use jargon without first defining it
 - Add module summaries to plan.md (that file is the roadmap only)
-- Create new Python files unless the user explicitly asks, or a module is being completed
+- Create `.py` learning scripts by default when notebook format is requested
