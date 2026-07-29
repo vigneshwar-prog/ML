@@ -6,6 +6,7 @@ Run: python numpy_basics.py
 
 import numpy as np
 
+# %%
 print("=" * 50)
 print("SECTION 1: Creating Arrays")
 print("=" * 50)
@@ -25,8 +26,9 @@ print("arange    :", np.arange(0, 10, 2))   # 0,2,4,6,8
 print("linspace  :", np.linspace(0, 1, 5))  # 5 evenly spaced points
 
 # ── PRACTICE: Create an array of 10 values from 0 to 100 using linspace ──
+print("linspace  :", np.linspace(0, 100, 10))  # 10 evenly spaced points from 0 to 100
 
-
+# %%
 print("\n" + "=" * 50)
 print("SECTION 2: Vectorized Math (no loops)")
 print("=" * 50)
@@ -37,8 +39,11 @@ print("a ** 2 :", a ** 2)
 print("sqrt(a):", np.sqrt(a).round(3))
 
 # ── PRACTICE: Compute a + b, a - b, a * b without any loop ──
+print("a - b  :", a - b)
+print("a * b  :", a * b)
+print("a / b  :", a / b)
 
-
+# %%
 print("\n" + "=" * 50)
 print("SECTION 3: Aggregations")
 print("=" * 50)
@@ -53,8 +58,11 @@ print("Min / Max :", np.min(data), "/", np.max(data))
 print("Sum       :", np.sum(data))
 
 # ── PRACTICE: Find the index of the minimum and maximum value (hint: argmin/argmax) ──
+print("Index of Min:", np.argmin(data))
+print("Index of Max:", np.argmax(data))
 
 
+# %%
 print("\n" + "=" * 50)
 print("SECTION 4: Dot Product & Matrix Ops")
 print("=" * 50)
@@ -71,8 +79,12 @@ X = np.array([[5, 6], [7, 8]])
 print("W @ X =\n", W @ X)        # matrix multiplication (same as np.matmul)
 
 # ── PRACTICE: Create a 3x3 identity matrix using np.eye(3) ──
+W = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+X = np.array([[9, 8, 7], [6, 5, 4], [3, 2, 1]])
+print("W @ X =\n", W @ X)        # matrix multiplication (same as np.matmul)
 
 
+# %%
 print("\n" + "=" * 50)
 print("SECTION 5: Normalization (Feature Scaling)")
 print("=" * 50)
