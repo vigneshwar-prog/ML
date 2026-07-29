@@ -55,22 +55,49 @@ Update [learning.html](learning.html) with:
 | 6 | Specialized Domains | 25+ |
 | 7 | Interview Bootcamp | 25–28 |
 
+## Environment Setup
+- Virtual env: `.venv/` at workspace root (excluded from git via `.gitignore`)
+- Activate: `source .venv/bin/activate`
+- Install deps: `pip install -r requirements.txt`
+- **After installing any new package**: run `pip freeze > requirements.txt` to keep it updated
+
+Current packages (see [requirements.txt](requirements.txt)):
+- Phase 0–1: `numpy`, `pandas`, `matplotlib`, `scikit-learn`
+- Phase 4+ (add when needed): `torch`, `tensorflow`, `keras`
+
 ## Code File Convention
-Every module's code goes in a dedicated file under `code/`:
+Every topic gets its own file inside a named subfolder under `code/`:
 
 ```
 code/
-  phase0/   module_0_1_numpy_pandas_matplotlib.py
-  phase1/   module_1_1_linear_regression.py
-  phase2/   ...
+  phase0/
+    python_for_ml/
+      numpy_basics.py
+      pandas_basics.py
+      matplotlib_basics.py
+    linear_algebra/
+      vectors_matrices.py
+      dot_product.py
+    statistics/
+      distributions.py
+      bias_variance.py
+    calculus/
+      derivatives_gradients.py
+  phase1/
+    linear_regression/
+      theory_and_code.py
+    logistic_regression/
+      theory_and_code.py
   ...
 ```
 
-Naming: `module_<phase>_<num>_<short_slug>.py`
+Naming rules:
+- Subfolder = topic name (e.g., `python_for_ml`, `linear_regression`)
+- File = concept name, lowercase with underscores (e.g., `numpy_basics.py`)
 - Include section headers (`SECTION 1`, `SECTION 2`, …) inside each file
 - End each section with a `# ── PRACTICE: …` comment prompt
 - Save plots with `plt.savefig()` alongside the script, not just `plt.show()`
-- Never dump all code in one block — split by concept within the file
+- One concept per file — never combine unrelated topics
 
 ## Do NOT
 - Skip theory and jump straight to code
