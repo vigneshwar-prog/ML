@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ML Learning Tracker 🧠</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --card2: #22263a;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --accent4: #ffd93d;
+      --text: #e0e0e0;
+      --muted: #8888aa;
+      --border: #2e3150;
+      --green: #00d4aa;
+      --red: #ff6b6b;
+      --yellow: #ffd93d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #1a1d27 0%, #12152a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    header h1 { font-size: 1.6rem; }
+    header h1 span { color: var(--accent); }
+    .header-meta { color: var(--muted); font-size: 0.85rem; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-align: center;
+    }
+    .stat-card .val { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── PHASE PROGRESS ── */
+    .phases-section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .phase-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .phase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .phase-name { font-size: 0.9rem; font-weight: 600; }
+    .phase-pct { font-size: 0.85rem; color: var(--accent2); font-weight: 700; }
+    .progress-bar {
+      background: var(--border);
+      border-radius: 99px;
+      height: 7px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.5s ease;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── LOG TABLE ── */
+    .log-section { display: none; }
+    .log-section.visible { display: block; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    thead th {
+      background: var(--card2);
+      color: var(--muted);
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: var(--card2); }
+    tbody td { padding: 12px 14px; vertical-align: middle; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .badge-green  { background: rgba(0,212,170,0.15); color: var(--green); }
+    .badge-red    { background: rgba(255,107,107,0.15); color: var(--red); }
+    .badge-yellow { background: rgba(255,217,61,0.15); color: var(--yellow); }
+    .badge-purple { background: rgba(108,99,255,0.15); color: var(--accent); }
+    .stars { color: var(--yellow); letter-spacing: 2px; }
+    .flag-yes { color: var(--red); font-weight: 700; }
+    .flag-no  { color: var(--green); }
+
+    /* ── RECALL CARDS ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .recall-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .recall-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+    }
+    .recall-card h3 { font-size: 0.95rem; margin-bottom: 12px; color: var(--accent2); padding-left: 8px;}
+    .recall-row { font-size: 0.82rem; margin-bottom: 7px; padding-left: 8px; }
+    .recall-row strong { color: var(--muted); display: inline-block; width: 90px; }
+    .recall-row span { color: var(--text); }
+
+    /* ── INTERVIEW BANK ── */
+    .interview-list { display: flex; flex-direction: column; gap: 14px; }
+    .interview-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .interview-item .q {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .interview-item .a {
+      font-size: 0.83rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .interview-item .tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      background: rgba(108,99,255,0.15);
+      color: var(--accent);
+    }
+    .trap-tag {
+      background: rgba(255,107,107,0.15) !important;
+      color: var(--red) !important;
+    }
+
+    /* ── ADD ENTRY FORM ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group label { font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .star-input { display: flex; gap: 6px; }
+    .star-input span {
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.15s;
+    }
+    .star-input span.active { color: var(--yellow); }
+    .btn {
+      padding: 11px 28px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #7c74ff; }
+    .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); }
+    .btn-danger:hover { background: rgba(255,107,107,0.1); }
+    .form-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* ── HEATMAP ── */
+    .heatmap-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+    .heat-cell {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      background: var(--border);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .heat-cell:hover { transform: scale(1.3); }
+    .heat-1 { background: rgba(108,99,255,0.3); }
+    .heat-2 { background: rgba(108,99,255,0.55); }
+    .heat-3 { background: rgba(108,99,255,0.8); }
+    .heat-4 { background: var(--accent); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── SEARCH ── */
+    .search-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 18px;
+      transition: border-color 0.2s;
+    }
+    .search-bar:focus { border-color: var(--accent); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      header { padding: 18px 16px; }
+      .container { padding: 18px 12px; }
+      .stat-card .val { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧠 ML Learning <span>Tracker</span></h1>
+    <div class="header-meta">Started: 2026-07-29 &nbsp;|&nbsp; Goal: ML & DL — Interview Ready</div>
+  </div>
+  <div class="header-meta" id="todayDate"></div>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="val" id="statModules">0</div>
+      <div class="lbl">Modules Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statDays">0</div>
+      <div class="lbl">Days Studied</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statQs">0</div>
+      <div class="lbl">Interview Qs Practiced</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statAvgConf">—</div>
+      <div class="lbl">Avg Confidence</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statRevision">0</div>
+      <div class="lbl">Needs Revision</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" id="statOverall">0%</div>
+      <div class="lbl">Overall Progress</div>
+    </div>
+  </div>
+
+  <!-- PHASE PROGRESS -->
+  <div class="phases-section">
+    <div class="section-title">📊 Phase Progress</div>
+    <div class="phase-grid" id="phaseGrid"></div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="phases-section">
+    <div class="section-title">📅 Study Activity (Last 60 Days)</div>
+    <div class="heatmap-row" id="heatmap"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('log')">📋 Learning Log</button>
+    <button class="tab-btn" onclick="switchTab('recall')">🃏 Recall Cards</button>
+    <button class="tab-btn" onclick="switchTab('interview')">🎤 Interview Bank</button>
+    <button class="tab-btn" onclick="switchTab('add')">➕ Add Entry</button>
+  </div>
+
+  <!-- LOG TAB -->
+  <div class="log-section visible" id="tab-log">
+    <input class="search-bar" type="text" id="searchInput" placeholder="🔍  Search modules, concepts, notes..." oninput="renderLog()" />
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Phase</th>
+            <th>Module</th>
+            <th>Concepts</th>
+            <th>Code</th>
+            <th>Interview Qs</th>
+            <th>Confidence</th>
+            <th>Revision</th>
+            <th>Notes</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="logBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyLog">
+        <div class="icon">📭</div>
+        <p>No entries yet. Click <strong>Add Entry</strong> to log your first module!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECALL TAB -->
+  <div class="log-section" id="tab-recall">
+    <div class="cards-grid" id="recallGrid"></div>
+    <div class="empty-state" id="emptyRecall">
+      <div class="icon">🃏</div>
+      <p>Recall cards appear here after you add entries with a 1-liner summary.</p>
+    </div>
+  </div>
+
+  <!-- INTERVIEW TAB -->
+  <div class="log-section" id="tab-interview">
+    <div class="interview-list" id="interviewList"></div>
+    <div class="empty-state" id="emptyInterview">
+      <div class="icon">🎤</div>
+      <p>Interview questions you've practiced will appear here.</p>
+    </div>
+  </div>
+
+  <!-- ADD ENTRY TAB -->
+  <div class="log-section" id="tab-add">
+    <div class="form-card">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>📅 Date Studied</label>
+          <input type="date" id="fDate" />
+        </div>
+
+        <div class="form-group">
+          <label>📌 Phase</label>
+          <select id="fPhase">
+            <option value="">— Select Phase —</option>
+            <option>Phase 0 — Prerequisites</option>
+            <option>Phase 1 — Classical ML</option>
+            <option>Phase 2 — Evaluation & Tuning</option>
+            <option>Phase 3 — Unsupervised Learning</option>
+            <option>Phase 4 — Deep Learning</option>
+            <option>Phase 5 — Advanced DL</option>
+            <option>Phase 6 — Specialization</option>
+            <option>Phase 7 — Interview Bootcamp</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>📖 Module Name</label>
+          <input type="text" id="fModule" placeholder="e.g. Linear Regression" />
+        </div>
+
+        <div class="form-group">
+          <label>🔑 Concepts Covered</label>
+          <input type="text" id="fConcepts" placeholder="e.g. MSE, Gradient Descent" />
+        </div>
+
+        <div class="form-group">
+          <label>💻 Code Written?</label>
+          <select id="fCode">
+            <option value="Yes">✅ Yes</option>
+            <option value="No">❌ No</option>
+            <option value="Partial">⚠️ Partial</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>🎤 Interview Qs Practiced</label>
+          <input type="number" id="fQs" min="0" max="20" placeholder="e.g. 5" />
+        </div>
+
+        <div class="form-group">
+          <label>⭐ Confidence (1–5)</label>
+          <div class="star-input" id="starInput">
+            <span onclick="setStar(1)">★</span>
+            <span onclick="setStar(2)">★</span>
+            <span onclick="setStar(3)">★</span>
+            <span onclick="setStar(4)">★</span>
+            <span onclick="setStar(5)">★</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🔁 Needs Revision?</label>
+          <select id="fRevision">
+            <option value="No">✅ No</option>
+            <option value="Yes">⚠️ Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>🧠 1-Liner Summary (for Recall Card)</label>
+          <input type="text" id="fOneLiner" placeholder='e.g. "Finds best-fit line by minimizing MSE using Gradient Descent"' />
+        </div>
+
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>🎤 Interview Q Practiced (paste one key question)</label>
+          <input type="text" id="fInterviewQ" placeholder="e.g. Does Linear Regression need feature scaling?" />
+        </div>
+
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>✅ Your Answer / Model Answer</label>
+          <textarea id="fInterviewA" placeholder="e.g. Yes — gradient descent converges faster with normalized features..."></textarea>
+        </div>
+
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>⚠️ Trap Question Encountered</label>
+          <input type="text" id="fTrap" placeholder="e.g. Can LR be used for classification?" />
+        </div>
+
+        <div class="form-group" style="grid-column: 1/-1">
+          <label>📝 Personal Notes</label>
+          <textarea id="fNotes" placeholder="Key takeaways, things to remember, mistakes made..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addEntry()">➕ Save Entry</button>
+        <button class="btn btn-danger" onclick="clearForm()">🗑 Clear Form</button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ── STATE ──
+  const PHASES = [
+    'Phase 0 — Prerequisites',
+    'Phase 1 — Classical ML',
+    'Phase 2 — Evaluation & Tuning',
+    'Phase 3 — Unsupervised Learning',
+    'Phase 4 — Deep Learning',
+    'Phase 5 — Advanced DL',
+    'Phase 6 — Specialization',
+    'Phase 7 — Interview Bootcamp',
+  ];
+
+  // Total modules per phase (for progress %)
+  const PHASE_TOTALS = {
+    'Phase 0 — Prerequisites': 4,
+    'Phase 1 — Classical ML': 8,
+    'Phase 2 — Evaluation & Tuning': 9,
+    'Phase 3 — Unsupervised Learning': 4,
+    'Phase 4 — Deep Learning': 10,
+    'Phase 5 — Advanced DL': 6,
+    'Phase 6 — Specialization': 4,
+    'Phase 7 — Interview Bootcamp': 4,
+  };
+
+  let entries = JSON.parse(localStorage.getItem('mlEntries') || '[]');
+  let starRating = 0;
+
+  // ── INIT ──
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-GB', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+
+  renderAll();
+
+  // ── RENDER ALL ──
+  function renderAll() {
+    renderStats();
+    renderPhases();
+    renderHeatmap();
+    renderLog();
+    renderRecall();
+    renderInterview();
+  }
+
+  // ── STATS ──
+  function renderStats() {
+    const total = entries.length;
+    const days = new Set(entries.map(e => e.date)).size;
+    const qs = entries.reduce((s, e) => s + (parseInt(e.qs) || 0), 0);
+    const confs = entries.map(e => e.stars).filter(Boolean);
+    const avgConf = confs.length ? (confs.reduce((a,b)=>a+b,0)/confs.length).toFixed(1) : '—';
+    const revision = entries.filter(e => e.revision === 'Yes').length;
+    const totalModules = Object.values(PHASE_TOTALS).reduce((a,b)=>a+b,0);
+    const overall = Math.round((total / totalModules) * 100);
+
+    document.getElementById('statModules').textContent = total;
+    document.getElementById('statDays').textContent = days;
+    document.getElementById('statQs').textContent = qs;
+    document.getElementById('statAvgConf').textContent = avgConf !== '—' ? avgConf + '★' : '—';
+    document.getElementById('statRevision').textContent = revision;
+    document.getElementById('statOverall').textContent = Math.min(overall, 100) + '%';
+  }
+
+  // ── PHASES ──
+  function renderPhases() {
+    const grid = document.getElementById('phaseGrid');
+    grid.innerHTML = '';
+    PHASES.forEach(ph => {
+      const done = entries.filter(e => e.phase === ph).length;
+      const total = PHASE_TOTALS[ph] || 1;
+      const pct = Math.min(Math.round((done / total) * 100), 100);
+      grid.innerHTML += `
+        <div class="phase-card">
+          <div class="phase-header">
+            <span class="phase-name">${ph}</span>
+            <span class="phase-pct">${done}/${total} · ${pct}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    });
+  }
+
+  // ── HEATMAP ──
+  function renderHeatmap() {
+    const hm = document.getElementById('heatmap');
+    hm.innerHTML = '';
+    const dateCounts = {};
+    entries.forEach(e => { dateCounts[e.date] = (dateCounts[e.date] || 0) + 1; });
+    for (let i = 59; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      const count = dateCounts[key] || 0;
+      const cls = count === 0 ? '' : count === 1 ? 'heat-1' : count === 2 ? 'heat-2' : count === 3 ? 'heat-3' : 'heat-4';
+      hm.innerHTML += `<div class="heat-cell ${cls}" title="${key}: ${count} module(s)"></div>`;
+    }
+  }
+
+  // ── LOG TABLE ──
+  function renderLog() {
+    const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    const filtered = entries.filter(e =>
+      !q ||
+      (e.module||'').toLowerCase().includes(q) ||
+      (e.concepts||'').toLowerCase().includes(q) ||
+      (e.notes||'').toLowerCase().includes(q) ||
+      (e.phase||'').toLowerCase().includes(q)
+    );
+    const body = document.getElementById('logBody');
+    const empty = document.getElementById('emptyLog');
+    if (!filtered.length) {
+      body.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    body.innerHTML = filtered.map((e, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${e.date}</td>
+        <td><span class="badge badge-purple">${e.phase?.split('—')[0].trim()}</span></td>
+        <td><strong>${e.module}</strong></td>
+        <td style="max-width:180px;color:var(--muted);font-size:0.8rem">${e.concepts}</td>
+        <td><span class="badge ${e.code==='Yes'?'badge-green':e.code==='Partial'?'badge-yellow':'badge-red'}">${e.code}</span></td>
+        <td style="text-align:center">${e.qs || 0}</td>
+        <td><span class="stars">${'★'.repeat(e.stars||0)}${'☆'.repeat(5-(e.stars||0))}</span></td>
+        <td class="${e.revision==='Yes'?'flag-yes':'flag-no'}">${e.revision==='Yes'?'⚠️ Yes':'✅ No'}</td>
+        <td style="max-width:200px;font-size:0.78rem;color:var(--muted)">${e.notes||'—'}</td>
+        <td><button class="btn btn-danger" style="padding:5px 12px;font-size:0.75rem" onclick="deleteEntry(${entries.indexOf(e)})">✕</button></td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RECALL CARDS ──
+  function renderRecall() {
+    const grid = document.getElementById('recallGrid');
+    const empty = document.getElementById('emptyRecall');
+    const cards = entries.filter(e => e.oneLiner);
+    if (!cards.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+    grid.innerHTML = cards.map(e => `
+      <div class="recall-card">
+        <h3>🃏 ${e.module}</h3>
+        <div class="recall-row"><strong>One-liner:</strong> <span><em>"${e.oneLiner}"</em></span></div>
+        <div class="recall-row"><strong>Concepts:</strong> <span>${e.concepts||'—'}</span></div>
+        <div class="recall-row"><strong>Phase:</strong> <span>${e.phase||'—'}</span></div>
+        <div class="recall-row"><strong>Date:</strong> <span>${e.date}</span></div>
+        <div class="recall-row"><strong>Confidence:</strong> <span class="stars">${'★'.repeat(e.stars||0)}${'☆'.repeat(5-(e.stars||0))}</span></div>
+        ${e.trap ? `<div class="recall-row"><strong>⚠️ Trap Q:</strong> <span style="color:var(--red)">${e.trap}</span></div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // ── INTERVIEW BANK ──
+  function renderInterview() {
+    const list = document.getElementById('interviewList');
+    const empty = document.getElementById('emptyInterview');
+    const items = entries.filter(e => e.interviewQ);
+    if (!items.length) { list.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display = 'none';
+    list.innerHTML = items.map(e => `
+      <div class="interview-item">
+        <div class="q">❓ ${e.interviewQ}</div>
+        <div class="a">${e.interviewA||'—'}</div>
+        <span class="tag">${e.module}</span>
+        ${e.trap ? `<span class="tag trap-tag">⚠️ Trap: ${e.trap}</span>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // ── TABS ──
+  function switchTab(name) {
+    document.querySelectorAll('.log-section').forEach(s => s.classList.remove('visible'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('visible');
+    event.target.classList.add('active');
+  }
+
+  // ── STARS ──
+  function setStar(n) {
+    starRating = n;
+    document.querySelectorAll('#starInput span').forEach((s, i) => {
+      s.classList.toggle('active', i < n);
+    });
+  }
+
+  // ── ADD ENTRY ──
+  function addEntry() {
+    const get = id => document.getElementById(id).value.trim();
+    const phase  = get('fPhase');
+    const module = get('fModule');
+    const date   = get('fDate');
+    if (!phase || !module || !date) {
+      alert('Please fill in Date, Phase, and Module Name at minimum.');
+      return;
+    }
+    const entry = {
+      date, phase, module,
+      concepts:   get('fConcepts'),
+      code:       get('fCode'),
+      qs:         get('fQs'),
+      stars:      starRating,
+      revision:   get('fRevision'),
+      oneLiner:   get('fOneLiner'),
+      interviewQ: get('fInterviewQ'),
+      interviewA: get('fInterviewA'),
+      trap:       get('fTrap'),
+      notes:      get('fNotes'),
+    };
+    entries.push(entry);
+    localStorage.setItem('mlEntries', JSON.stringify(entries));
+    clearForm();
+    renderAll();
+    switchTab('log');
+    // switch tab button highlight
+    document.querySelectorAll('.tab-btn').forEach((b,i)=>{ b.classList.toggle('active', i===0); });
+  }
+
+  // ── DELETE ──
+  function deleteEntry(idx) {
+    if (!confirm('Delete this entry?')) return;
+    entries.splice(idx, 1);
+    localStorage.setItem('mlEntries', JSON.stringify(entries));
+    renderAll();
+  }
+
+  // ── CLEAR FORM ──
+  function clearForm() {
+    ['fPhase','fModule','fConcepts','fCode','fQs','fRevision','fOneLiner','fInterviewQ','fInterviewA','fTrap','fNotes']
+      .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+    setStar(0); starRating = 0;
+  }
+</script>
+</body>
+</html>
