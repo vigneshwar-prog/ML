@@ -576,13 +576,13 @@
       module: 'Python for ML (NumPy, Pandas, Matplotlib)',
       concepts: 'NumPy arrays, vectorized math, aggregations, Pandas DataFrame, filtering, groupby, Matplotlib plots',
       code: 'Yes',
-      qs: '15',
+      qs: '0',
       stars: 4,
       revision: 'No',
       oneLiner: 'NumPy handles fast math, Pandas handles tables, and Matplotlib turns data into visual insights.',
-      interviewQ: 'Why do we use NumPy arrays instead of Python lists in ML?',
-      interviewA: 'NumPy is faster due to contiguous memory and vectorized operations, which are critical for large-scale ML computations.',
-      trap: 'Can Pandas fully replace NumPy for ML math?',
+      interviewQ: '',
+      interviewA: '',
+      trap: '',
       notes: 'Completed notebook-based practice for numpy_basics, pandas_basics, and matplotlib_basics.'
     }
   ];
@@ -593,6 +593,20 @@
   DEFAULT_ENTRIES.forEach(seed => {
     const exists = entries.some(e => e.module === seed.module && e.date === seed.date);
     if (!exists) entries.push(seed);
+  });
+
+  // Correct earlier seeded values if present in localStorage.
+  entries = entries.map(e => {
+    if (e.module === 'Python for ML (NumPy, Pandas, Matplotlib)' && e.date === '2026-07-29') {
+      return {
+        ...e,
+        qs: '0',
+        interviewQ: '',
+        interviewA: '',
+        trap: ''
+      };
+    }
+    return e;
   });
   localStorage.setItem('mlEntries', JSON.stringify(entries));
   let starRating = 0;
